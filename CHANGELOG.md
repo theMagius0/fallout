@@ -1,3 +1,8 @@
+V 10.0.0
+
+- Updated for Foundry v10
+
+
 V 9.0.3
 
 - Introduced the "Hit Location Die" that is automatically rolled when clicking on the weapon. You can also roll it by using the "h" identifier. (eg. /r 1dh or as inline [[1dh]])
