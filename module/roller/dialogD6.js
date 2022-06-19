@@ -7,7 +7,7 @@ export class DialogD6 extends Dialog {
         this.options.classes = ["dice-icon"];
     }
 
-    static async createDialog({ rollName = "DC Roll", diceNum = 2, falloutRoll = null, weapon = null } = {}) {
+    static async createDialog({ rollName = "DC Roll", diceNum = 2, falloutRoll = null, weapon = null, actor = null } = {}) {
         let dialogData = {}
         dialogData.rollName = rollName;
         dialogData.diceNum = diceNum;
@@ -28,9 +28,9 @@ export class DialogD6 extends Dialog {
                     callback: (html) => {
                         let diceNum = html.find('.d-number')[0].value;
                         if (!falloutRoll)
-                            game.fallout.Roller2D20.rollD6({ rollname: rollName, dicenum: parseInt(diceNum), weapon: weapon });
+                            game.fallout.Roller2D20.rollD6({ rollname: rollName, dicenum: parseInt(diceNum), weapon: weapon, actor: actor });
                         else
-                            game.fallout.Roller2D20.addD6({ rollname: rollName, dicenum: parseInt(diceNum), weapon: weapon, falloutRoll: falloutRoll });
+                            game.fallout.Roller2D20.addD6({ rollname: rollName, dicenum: parseInt(diceNum), weapon: weapon, actor: actor, falloutRoll: falloutRoll });
                     }
                 }
             },

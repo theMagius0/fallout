@@ -1,3 +1,7 @@
+import {
+  outOfAmmo,
+} from '../helpers/effects.mjs'
+
 export class Roller2D20 {
     dicesRolled = [];
     successTreshold = 0;
@@ -152,18 +156,23 @@ export class Roller2D20 {
         return r;
     }
 
-    static async rollD6({ rollname = "Roll D6", dicenum = 2, weapon = null } = {}) {
-        let formula = `${dicenum}dc`;
-        let roll = new Roll(formula);
-        await roll.evaluate({ async: true });
-        await Roller2D20.parseD6Roll({
-            rollname: rollname,
-            roll: roll,
-            weapon: weapon
-        });
+    static async rollD6({ rollname = "Roll D6", dicenum = 2, weapon = null, actor = null } = {}) {
+		// DEVWERKS
+		let addMoreRounds = false;
+		if (!outOfAmmo(actor, weapon, dicenum, addMoreRounds)) {
+			let formula = `${dicenum}dc`;
+			let roll = new Roll(formula);
+			await roll.evaluate({ async: true });
+			await Roller2D20.parseD6Roll({
+				rollname: rollname,
+				roll: roll,
+				weapon: weapon,
+				actor: actor
+			});
+		}
     }
 
-    static async parseD6Roll({ rollname = "Roll D6", roll = null, dicesRolled = [], rerollIndexes = [], addDice = [], weapon = null } = {}) {
+    static async parseD6Roll({ rollname = "Roll D6", roll = null, dicesRolled = [], rerollIndexes = [], addDice = [], weapon = null, actor = null } = {}) {
         let diceResults = [
             { result: 1, effect: 0 },
             { result: 2, effect: 0 },
@@ -198,7 +207,8 @@ export class Roller2D20 {
             roll: roll,
             dicesRolled: dicesRolled,
             rerollIndexes: rerollIndexes,
-            weapon: weapon
+            weapon: weapon,
+			actor: actor
         });
     }
 
@@ -220,22 +230,28 @@ export class Roller2D20 {
         });
     }
 
-    static async addD6({ rollname = "Roll D6", dicenum = 2, falloutRoll = null, dicesRolled = [], weapon = null } = {}) {
-        let formula = `${dicenum}dc`;
-        let _roll = new Roll(formula);
-        await _roll.evaluate({ async: true });
-        let newRollName = `${falloutRoll.rollname} [+ ${dicenum} DC]`;
-        let oldDiceRolled = falloutRoll.dicesRolled;
-        await Roller2D20.parseD6Roll({
-            rollname: newRollName,
-            roll: _roll,
-            dicesRolled: dicesRolled,
-            addDice: oldDiceRolled,
-            weapon: weapon
-        });
+    static async addD6({ rollname = "Roll D6", dicenum = 2, falloutRoll = null, dicesRolled = [], weapon = null, actor = null } = {}) {
+
+		// DEVWERKS
+		let addMoreRounds = true;
+		if (!outOfAmmo(actor, weapon, dicenum, addMoreRounds)) {
+			let formula = `${dicenum}dc`;
+			let _roll = new Roll(formula);
+			await _roll.evaluate({ async: true });
+			let newRollName = `${falloutRoll.rollname} [+ ${dicenum} DC]`;
+			let oldDiceRolled = falloutRoll.dicesRolled;
+			await Roller2D20.parseD6Roll({
+				rollname: newRollName,
+				roll: _roll,
+				dicesRolled: dicesRolled,
+				addDice: oldDiceRolled,
+				weapon: weapon,
+				actor: actor
+			});
+		}	
     }
 
-    static async sendD6ToChat({ rollname = "Roll D6", roll = null, dicesRolled = [], rerollIndexes = [], weapon = null } = {}) {
+    static async sendD6ToChat({ rollname = "Roll D6", roll = null, dicesRolled = [], rerollIndexes = [], weapon = null, actor = null } = {}) {
         let damage = dicesRolled.reduce((a, b) => ({ result: a.result + b.result })).result;
         let effects = dicesRolled.reduce((a, b) => ({ effect: a.effect + b.effect })).effect;
         let weaponDamageTypesList = [];
@@ -274,7 +290,7 @@ export class Roller2D20 {
             user: game.user.id,
             rollMode: game.settings.get("core", "rollMode"),
             content: html,
-            flags: { falloutroll: falloutRoll, weapon: weapon },
+            flags: { falloutroll: falloutRoll, weapon: weapon, actor: actor },
             type: CONST.CHAT_MESSAGE_TYPES.ROLL,
             roll: roll,
         };

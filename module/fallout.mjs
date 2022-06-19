@@ -165,17 +165,20 @@ Hooks.on('renderChatMessage', (message, html, data) => {
       $(el.currentTarget).addClass('dice-selected')
     }
   })
+  
   let addBtn = html.find('.add-button')
   if (addBtn.length > 0) {
     addBtn[0].setAttribute('data-messageId', message.id)
     addBtn.click((ev) => {
       let falloutRoll = message.data.flags.falloutroll
+	  let actorID = message.data.flags.actor
       let weapon = message.data.flags.weapon
       game.fallout.DialogD6.createDialog({
         rollname: falloutRoll.rollname,
         diceNum: 1,
         falloutRoll: falloutRoll,
         weapon: weapon,
+		actor: actorID,
       })
     })
   }
